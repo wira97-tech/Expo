@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Button,
   Image,
   StyleSheet,
-  TouchableOpacity,
   TextInput,
   Picker,
   CheckBox,
@@ -14,8 +12,27 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome5";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { supabase } from "../supabase";
 
 const List = () => {
+  const [todos, setTodos] = useState([]);
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const { data, error } = await supabase.from("list").select("*");
+        if (error) {
+          throw error;
+        }
+        setTodos(data);
+      } catch (error) {
+        console.error("Error fetching todos:", error.message);
+      }
+    };
+
+    fetchTodos();
+  }, []);
   //elemen dropdown
   const [selectedValue, setSelectedValue] = useState(null);
 
@@ -31,6 +48,25 @@ const List = () => {
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
+
+  const truncateDescription = (description) => {
+    const words = description.split(" ");
+    if (words.length > 3) {
+      return words.slice(0, 3).join(" ") + "...";
+    }
+    return description;
+  };
+
+  const backgroundColor = (index) => {
+    const colors = ["#b0e9f7", "#eefaa7", "#f7b0c6", "#d3b0f7", "#cfd0d1"];
+    return colors[index % colors.length];
+  };
+
+  const backgroundColorCategory = (index) => {
+    const colors = ["#7ef1f7", "#f77eb5", "#f77e7e", "#f7f17e", "#9ef77e"];
+    return colors[index % colors.length];
+  };
+
   return (
     <View style={{ padding: 10 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -149,266 +185,81 @@ const List = () => {
           <Picker.Item label="Category 3" value="Category3" />
         </Picker>
       </View>
-      <View style={{ marginTop: "1rem" }}>
-        <View
-          style={{
-            width: "auto",
-            height: 100,
-            backgroundColor: "#b0e9f7",
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#b0e9f7",
-            padding: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 5,
-            }}
-          >
-            <View>
-              <Text
-                style={[styles.todoText, isSelected1 && styles.strikethrough]}
-              >
-                Study - React
-              </Text>
-              <Text style={[isSelected1 && styles.strikethrough]}>
-                Ampun Sepuh Aku Baru Kenal
-              </Text>
+      <View style={{ marginTop: 10, flex: 1 }}>
+        <FlatList
+          data={todos}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item, index }) => (
+            <View
+              style={{
+                width: "auto",
+                height: 100,
+                backgroundColor: backgroundColor(index),
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: backgroundColor(index),
+                padding: 5,
+                marginTop: 10,
+              }}
+            >
               <View
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  marginTop: 7,
+                  justifyContent: "space-between",
+                  marginTop: 5,
                 }}
               >
-                <Icon name="calendar" size={20} color="#82817c" />
-                <Text style={{ marginLeft: 8 }}>1 Desember 2023</Text>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      styles.todoText,
+                      isSelected1 && styles.strikethrough,
+                    ]}
+                  >
+                    {item.category} - {item.name}
+                  </Text>
+                  <Text style={[isSelected1 && styles.strikethrough]}>
+                    {truncateDescription(item.description)}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 7,
+                    }}
+                  >
+                    <Icon name="calendar" size={20} color="#82817c" />
+                    <Text style={{ marginLeft: 8 }}>{item.date}</Text>
+                  </View>
+                </View>
+                <View style={{ alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 60,
+                      height: 20,
+                      backgroundColor: backgroundColorCategory(index),
+                      borderRadius: 6,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={{ fontWeight: "bold" }}>{item.category}</Text>
+                  </View>
+                  <CheckBox
+                    value={isSelected1}
+                    onValueChange={setSelection1}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 10,
+                      marginTop: 10,
+                    }}
+                  />
+                </View>
               </View>
             </View>
-            <View style={{ alignItems: "center" }}>
-              <View
-                style={{
-                  width: 60,
-                  height: 20,
-                  backgroundColor: "#eefaa7",
-                  borderRadius: 10,
-                  alignItems: "center",
-                }}
-              >
-                <Text>Study</Text>
-              </View>
-              <CheckBox
-                value={isSelected1}
-                onValueChange={setSelection1}
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  marginTop: 10,
-                }}
-              />
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            width: "auto",
-            height: 100,
-            backgroundColor: "#eefaa7",
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#eefaa7",
-            marginTop: 10,
-            padding: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 5,
-            }}
-          >
-            <View>
-              <Text
-                style={[styles.todoText, isSelected2 && styles.strikethrough]}
-              >
-                Study - React
-              </Text>
-              <Text style={[isSelected2 && styles.strikethrough]}>
-                Ampun Sepuh Aku Baru Kenal
-              </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginTop: 7,
-                }}
-              >
-                <Icon name="calendar" size={20} color="#82817c" />
-                <Text style={{ marginLeft: 8 }}>1 Desember 2023</Text>
-              </View>
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <View
-                style={{
-                  width: 60,
-                  height: 20,
-                  backgroundColor: "#b0e9f7",
-                  borderRadius: 10,
-                  alignItems: "center",
-                }}
-              >
-                <Text>Study</Text>
-              </View>
-              <CheckBox
-                value={isSelected2}
-                onValueChange={setSelection2}
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  marginTop: 10,
-                }}
-              />
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            width: "auto",
-            height: 100,
-            backgroundColor: "#f7b0c6",
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#f7b0c6",
-            marginTop: 10,
-            padding: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 5,
-            }}
-          >
-            <View>
-              <Text
-                style={[styles.todoText, isSelected3 && styles.strikethrough]}
-              >
-                Study - React
-              </Text>
-              <Text style={[isSelected3 && styles.strikethrough]}>
-                Ampun Sepuh Aku Baru Kenal
-              </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginTop: 7,
-                }}
-              >
-                <Icon name="calendar" size={20} color="#82817c" />
-                <Text style={{ marginLeft: 8 }}>1 Desember 2023</Text>
-              </View>
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <View
-                style={{
-                  width: 60,
-                  height: 20,
-                  backgroundColor: "#d3b0f7",
-                  borderRadius: 10,
-                  alignItems: "center",
-                }}
-              >
-                <Text>Study</Text>
-              </View>
-              <CheckBox
-                value={isSelected3}
-                onValueChange={setSelection3}
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  marginTop: 10,
-                }}
-              />
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            width: "auto",
-            height: 100,
-            backgroundColor: "#d3b0f7",
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: "#d3b0f7",
-            marginTop: 10,
-            padding: 5,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 5,
-            }}
-          >
-            <View>
-              <Text
-                style={[styles.todoText, isSelected4 && styles.strikethrough]}
-              >
-                Study - React
-              </Text>
-              <Text style={[isSelected4 && styles.strikethrough]}>
-                Ampun Sepuh Aku Baru Kenal
-              </Text>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginTop: 7,
-                }}
-              >
-                <Icon name="calendar" size={20} color="#82817c" />
-                <Text style={{ marginLeft: 8 }}>1 Desember 2023</Text>
-              </View>
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <View
-                style={{
-                  width: 60,
-                  height: 20,
-                  backgroundColor: "#f7b0c6",
-                  borderRadius: 10,
-                  alignItems: "center",
-                }}
-              >
-                <Text>Study</Text>
-              </View>
-              <CheckBox
-                value={isSelected4}
-                onValueChange={setSelection4}
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  marginTop: 10,
-                }}
-              />
-            </View>
-          </View>
-        </View>
+          )}
+        />
       </View>
     </View>
   );
@@ -420,6 +271,7 @@ const styles = StyleSheet.create({
   todoText: {
     fontSize: 16,
     fontWeight: "bold",
+    flex: 1,
   },
   strikethrough: {
     textDecorationLine: "line-through",

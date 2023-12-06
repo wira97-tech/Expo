@@ -54,7 +54,7 @@ function MyTabs() {
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Navigator">
         <Stack.Screen
           name="Home"
           component={HomeScreen}

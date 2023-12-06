@@ -22,6 +22,7 @@
     "@react-navigation/stack": "^6.3.20",
     "@supabase/supabase-js": "^2.0.0-rc.13",
     "bootstrap": "^5.3.2",
+    "date-fns": "^2.30.0",
     "expo": "~49.0.15",
     "expo-status-bar": "~1.6.0",
     "native-base": "^3.4.28",
@@ -40,6 +41,7 @@
     "react-native-svg": "13.9.0",
     "react-native-vector-icons": "^10.0.2",
     "react-native-web": "~0.19.6",
+    "react-query": "^3.39.3",
     "rn-round-checkbox": "^1.0.0",
     "styled-components": "^6.1.1",
     "styled-system": "^5.1.5"
